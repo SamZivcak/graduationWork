@@ -7,13 +7,15 @@ const commands = [
   },
   {
     name: "write",
-    description: 'writes something about itself',
+    description: "writes something about itself",
+  },
+  {
+    name: "testToken",
+    description: "writes token into console",
   },
 ];
 
-const rest = new REST({ version: "10" }).setToken(
-  "MTE3MDcyNjI1MDM1MzAwMDYzMA.GjRYNE.IZ41bj0YgPj9UFZjecwyzmyKebUBXoJhRwBG_k"
-);
+const rest = new REST({ version: "10" }).setToken(toString(process.env.TOKEN));
 
 (async () => {
   try {

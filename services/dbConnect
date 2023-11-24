@@ -1,0 +1,17 @@
+const Client = require("pg").Client;
+require("dotenv").config();
+
+const client = new Client({
+  host: "127.0.0.1",
+  port: 5432,
+  database: "botDatabase",
+  user: "tutorial",
+  password: "heslo",
+});
+
+async function connectClient() {
+  await client.connect();
+  await client.end();
+}
+
+connectClient();

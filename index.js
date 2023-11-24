@@ -1,4 +1,7 @@
+require("dotenv").config();
+
 const { Client, GatewayIntentBits } = require("discord.js");
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -15,7 +18,7 @@ client.on("interactionCreate", (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
   if (interaction.commandName === "ping") {
-    interaction.reply("Pong!");
+    interaction.reply("pong");
   }
 
   if (interaction.commandName === "write") {
@@ -23,6 +26,4 @@ client.on("interactionCreate", (interaction) => {
   }
 });
 
-client.login(
-  "MTE3MDcyNjI1MDM1MzAwMDYzMA.GjRYNE.IZ41bj0YgPj9UFZjecwyzmyKebUBXoJhRwBG_k"
-);
+client.login(process.env.TOKEN);
