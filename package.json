@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "create": "nodemon ./services/dbConnect",
     "start": "nodemon index.js"
   },
   "author": "",

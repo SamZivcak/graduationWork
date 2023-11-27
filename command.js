@@ -13,6 +13,10 @@ const commands = [
     name: "testToken",
     description: "writes token into console",
   },
+  {
+    name: "boughtStock",
+    description: "variables: name amount buy_price separated by SPACE, adds them to database",
+  },
 ];
 
 const rest = new REST({ version: "10" }).setToken(toString(process.env.TOKEN));
