@@ -1,10 +1,21 @@
 require("dotenv").config();
+const { response } = require("express");
+const { boughtStock, soldStock } = require("./services/dbConnect.js");
+const DatabaseClient = require("pg").Client;
 
-const dbconnect = require("./services/dbConnect");
+const databaseClient = new DatabaseClient({
+  host: "127.0.0.1",
+  port: 5432,
+  database: "botDatabase",
+  user: process.env.CLIENT_USERNAME,
+  password: process.env.CLIENT_PASSWORD,
+});
+
+databaseClient.connect();
 
 const { Client, GatewayIntentBits } = require("discord.js");
 
-const client = new Client({
+const discordClient = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
@@ -13,35 +24,44 @@ const client = new Client({
   ],
 });
 
-dbconnect.testConnectDatabase();
-
-client.on("messageCreate", (message) => {
+discordClient.on("messageCreate", (message) => {
   console.log(message.content);
 });
 
-client.on("interactionCreate", (interaction) => {
+discordClient.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
-
-  if (interaction.commandName === "ping") {
-    interaction.reply("pong");
-  }
-
-  if (interaction.commandName === "boughtStock") {
-    const vars = message.content.slice(prefix.length).trim().split(" ");
-    vars.shift();
-
-    if (!vars.length) {
-      return interaction.reply(
-        "Insufficient variables. Example: !boughtStock Cola 0.01 50000"
+  else if (interaction.commandName === "boughtstock") {
+    let response = "";
+    try {
+      response = await boughtStock(
+        databaseClient,
+        interaction.options.get("stock_name").value,
+        interaction.options.get("amount").value,
+        interaction.options.get("buy_price").value,
+        interaction.user.id
       );
+    } catch (error) {
+      console.log(error);
+      response = "An error has occured try again later.";
     }
-    dbconnect.boughtStock(vars[0], vars[1], vars[2], message.author.id);
-    dbconnect.udateUsers(message.author, message.author.id);
-  }
-
-  if (interaction.commandName === "write") {
-    interaction.reply("Ahoj jsem bot nic neumim.");
+    interaction.reply(response);
+  } else if (interaction.commandName === "soldstock") {
+    let response = "";
+    try {
+      response = await soldStock(
+        databaseClient,
+        interaction.options.get("sell_stock_name").value,
+        interaction.options.get("sell_amount").value,
+        interaction.options.get("sell_price").value,
+        interaction.options.get("stock_by_date").value,
+        interaction.user.id
+      );
+    } catch (error) {
+      console.log(error);
+      response = "An error has occured try again later.";
+    }
+    interaction.reply(response);
   }
 });
-
-client.login(process.env.TOKEN);
+discordClient.login(process.env.TOKEN);
+//databaseClient.end();
