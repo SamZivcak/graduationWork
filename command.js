@@ -49,12 +49,6 @@ const commands = [
         type: ApplicationCommandOptionType.Number,
         required: true,
       },
-      {
-        name: "stock_by_date",
-        description: "proceeds from the oldest",
-        type: ApplicationCommandOptionType.Boolean,
-        required: true,
-      },
     ],
   },
   {
@@ -74,9 +68,9 @@ const commands = [
         required: true,
       },
       {
-        name: 'minute',
+        name: "minute",
         type: ApplicationCommandOptionType.Integer,
-        description: 'The minute to schedule the message',
+        description: "The minute to schedule the message",
         required: true,
       },
     ],

@@ -20,10 +20,11 @@ async function boughtStock(
       `INSERT INTO "stocks_transactions" ("stock_name","stock_amount","stock_buy_price", "foreign_id", "action_type")
       VALUES('${stockName}', '${stockAmount}', '${stockBuyPrice}', '${userId}','purchase')`
     );
+    return "Transaction was recorded succesfully.";
   } catch (error) {
     console.log(error);
+    return "Transaction was recorded unsuccesfully.";
   }
-  return "Transaction was recorded succesfully.";
 }
 
 async function soldStock(
@@ -31,7 +32,6 @@ async function soldStock(
   sellStockName,
   sellAmount,
   sellPrice,
-  multipleStockByDate,
   foreignId
 ) {
   try {
@@ -61,7 +61,8 @@ async function soldStock(
     if (!stocksAmountSum) return "You don't have this stock.";
 
     if (stocksAmountSum >= sellAmount) {
-      await databaseClient.query(`INSERT INTO "stocks_transactions" ("stock_name","stock_amount","stock_buy_price", "foreign_id", "action_type")
+      await databaseClient.query(`INSERT INTO "stocks_transactions" ("stock_name","stock_amount",
+      "stock_buy_price", "foreign_id", "action_type")
       VALUES('${sellStockName}', '${sellAmount}', '${sellPrice}', '${userId}','sell')`);
       return "Transaction was recorded succesfully.";
     } else {
@@ -73,7 +74,6 @@ async function soldStock(
 }
 
 async function createUser(databaseClient, discord_id) {
-  console.log({ discord_id });
   return await databaseClient.query(
     `INSERT INTO "users" ("discord_id")
       VALUES('${discord_id}') RETURNING id`

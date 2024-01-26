@@ -1,6 +1,6 @@
 require("dotenv").config();
-const { response } = require("express");
 const { boughtStock, soldStock } = require("./services/dbConnect.js");
+const { getStockValue } = require("./testAxios.js");
 const DatabaseClient = require("pg").Client;
 const schedule = require("node-schedule");
 const welcome = require("./welcome");
@@ -37,29 +37,28 @@ discordClient.on("messageCreate", (message) => {
 discordClient.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   else if (interaction.commandName === "boughtstock") {
-    let response = "";
     try {
-      response = await boughtStock(
+      const response = await boughtStock(
         databaseClient,
         interaction.options.get("stock_name").value,
         interaction.options.get("amount").value,
         interaction.options.get("buy_price").value,
         interaction.user.id
       );
+
+      interaction.reply(response);
     } catch (error) {
       console.log(error);
       response = "An error has occured try again later.";
     }
-    interaction.reply(response);
   } else if (interaction.commandName === "soldstock") {
     let response = "";
     try {
       response = await soldStock(
         databaseClient,
         interaction.options.get("sell_stock_name").value,
-        interaction.options.get("sell_amount").value,
+        interaction.options.get("amount").value,
         interaction.options.get("sell_price").value,
-        interaction.options.get("stock_by_date").value,
         interaction.user.id
       );
     } catch (error) {
