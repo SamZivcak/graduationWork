@@ -6,7 +6,7 @@
     "start": "nodemon run index.js",
     "getValue": "nodemon run testAxios.js",
     "commands": "nodemon run command.js",
-    "calculate": "nodemon run calculate.js",
+    "kontrola": "nodemon run kontrola.js",
     "exchange": "nodemon run ./services/exchangeService.js"
   },
   "author": "",
