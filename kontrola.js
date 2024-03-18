@@ -62,6 +62,7 @@ async function portfolioValue(databaseClient, userId) {
       const stockValue = stockValues.find((item) => item[0] === name)[1];
       writeOut.push([name, stockAmount, stockValue]);
     }
+
     return writeOut;
   } catch (error) {
     console.error("Error in portfolioValue function:", error);
@@ -76,29 +77,102 @@ async function totalInvested(databaseClient, userId) {
 
     databaseId = databaseId.rows[0]?.id;
 
-    const table = await databaseClient.query(
+    const buying = await databaseClient.query(
       `SELECT stock_name, stock_amount, stock_buy_price FROM "stocks_transactions" 
       WHERE "foreign_id" = '${databaseId}' 
       AND "action_type" = 'purchase'`
     );
 
-    const tableRows = table.rows;
+    const selling = await databaseClient.query(
+      `SELECT stock_name, stock_amount, stock_buy_price FROM "stocks_transactions" 
+      WHERE "foreign_id" = '${databaseId}' 
+      AND "action_type" = 'sell'`
+    );
+
+    const tableRows = buying.rows;
+    const sellingRows = selling.rows;
 
     const singleStocks = [];
-    tableRows.forEach((stock) => {
+    tableRows.forEach((row) => {
       const index = singleStocks.findIndex(
-        (item) => item[0] === stock.stock_name
+        (item) => item[0] === row.stock_name
       );
-      if (index !== -1) {
-        singleStocks[index][1] += stock.stock_amount * stock.stock_buy_price;
+
+      if (index != -1) {
+        singleStocks[index].push([row.stock_buy_price, row.stock_amount]);
       } else {
         singleStocks.push([
-          stock.stock_name,
-          stock.stock_amount * stock.stock_buy_price,
+          row.stock_name,
+          [row.stock_buy_price, row.stock_amount],
         ]);
       }
     });
-    return singleStocks;
+
+    singleStocks.forEach((single) => {
+      single.sort((a, b) => b[0] - a[0]);
+    });
+
+    sellingRows.forEach((sold) => {
+      const index = singleStocks.findIndex(
+        (item) => item[0] === sold.stock_name
+      );
+      let amount = sold.stock_amount;
+      if (
+        index != -1 &&
+        amount < singleStocks[index][singleStocks[index].length - 1][1]
+      ) {
+        singleStocks[index][singleStocks[index].length - 1][1] -= amount;
+        amount = 0;
+      } else if (
+        index != -1 &&
+        amount == singleStocks[index][singleStocks[index].length - 1][1]
+      ) {
+        singleStocks[index].pop();
+        amount = 0;
+      } else if (
+        index != -1 &&
+        amount > singleStocks[index][singleStocks[index].length - 1][1]
+      ) {
+        amount -= singleStocks[index][singleStocks[index].length - 1][1];
+        singleStocks[index].pop();
+        while (amount > 0) {
+          if (
+            index != -1 &&
+            amount < singleStocks[index][singleStocks[index].length - 1][1]
+          ) {
+            singleStocks[index][singleStocks[index].length - 1][1] -= amount;
+            amount = 0;
+            break;
+          } else if (
+            index != -1 &&
+            amount == singleStocks[index][singleStocks[index].length - 1][1]
+          ) {
+            singleStocks[index].pop();
+            amount = 0;
+            break;
+          } else if (
+            index != -1 &&
+            amount > singleStocks[index][singleStocks[index].length - 1][1]
+          ) {
+            amount -= singleStocks[index][singleStocks[index].length - 1][1];
+            singleStocks[index].pop();
+          }
+        }
+      }
+    });
+
+    const writeOut = [];
+    let value = 0;
+
+    singleStocks.forEach((stock) => {
+      for (let index = 1; index < stock.length; index++) {
+        value += stock[index][0] * stock[index][1];
+      }
+      writeOut.push([stock[0], value]);
+      value = 0;
+    });
+
+    return writeOut;
   } catch (error) {
     console.error("Error in portfolioValue function:", error);
   }
@@ -136,12 +210,10 @@ async function cashAvailable(databaseClient, userId) {
     });
     let cash = 0;
     singleStocks.forEach((single) => {
-      //předělat na reduce
       cash += single[1];
     });
 
-    singleStocks.push(cash);
-    return singleStocks;
+    return cash;
   } catch (error) {
     console.error("Error in portfolioValue function:", error);
   }
@@ -271,7 +343,7 @@ async function compareStocks(databaseClient, userId) {
       const stockValue = stockValues.find((item) => item[0] === name)[1];
       writeOut.push([name, stockAmount, stockValue]);
     }
-    console.log(writeOut);
+
     return writeOut;
   } catch (error) {
     console.error("Error in portfolioValue function:", error);
@@ -408,25 +480,18 @@ async function profitLoss(databaseClient, userId) {
       }
     }
 
-    Promise.all(
+    return Promise.all(
       fusedArray.map(async ([name, value1, value2]) => {
         const newValue = await getStockValue(name);
         return [name, value1, newValue * value2];
       })
     ).then((result) => {
-      console.log(result);
       return result;
     });
   } catch (error) {
     console.error("Error in portfolioValue function:", error);
   }
 }
-
-
-(async () => {
-  const value = await totalInvested(databaseClient, process.env.DISCORD_ID);
-  console.log(value);
-})();
 
 module.exports = {
   portfolioValue,
