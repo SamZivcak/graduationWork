@@ -204,7 +204,7 @@ discordClient.on("interactionCreate", async (interaction) => {
       let marketSumColumn = "";
 
       // Populate the columns
-      stocksCompared.forEach(([name, myPrice, marketPrice]) => {
+      lossProfit.forEach(([name, myPrice, marketPrice]) => {
         stockNameColumn += name + "\n";
         mySumColumn += myPrice.toFixed(2) + "\n";
         marketSumColumn += marketPrice.toFixed(2) + "\n";
