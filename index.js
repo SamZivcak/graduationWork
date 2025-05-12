@@ -115,7 +115,7 @@ discordClient.on("interactionCreate", async (interaction) => {
       transposedValues.forEach((column, index) => {
         const name = column.join("\n"); // Join the column elements with newline
         valuefields.push({
-          name: index === 0 ? "Stock" : index === 1 ? "Quantity" : "Price", // Set appropriate column titles
+          name: index === 0 ? "Stock" : index === 1 ? "Quantity" : "Price", 
           value: name,
           inline: true, // Assuming you want all fields to be inline
         });

@@ -465,17 +465,12 @@ async function profitLoss(databaseClient, userId) {
 
     const fusedArray = [];
 
-    // Create a map from the first array
     const map = new Map(values);
 
-    // Iterate through the second array
     for (const [name, value] of amounts) {
-      // If the name exists in the map from the first array
       if (map.has(name)) {
-        // Combine the values and push to the fused array
         fusedArray.push([name, map.get(name), value]);
       } else {
-        // If name doesn't exist in the first array, push it directly
         fusedArray.push([name, undefined, value]);
       }
     }
